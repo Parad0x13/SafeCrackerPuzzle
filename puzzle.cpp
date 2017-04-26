@@ -11,88 +11,78 @@ using namespace std;
 
 class Puzzle {
 public:
-	Puzzle(int _layers = 9, int _slices = 16) {
-		layers = _layers;
-		slices = _slices;
-		layerIndexes = vector<int>(layers);
+	Puzzle(int _layerCount = 5, int _sliceCount = 16) {
+		layerCount = _layerCount;
+		sliceCount = _sliceCount;
+		layerIndexes = vector<int>(layerCount);
 
 		// [TODO] Add initialization support for situations other than the puzzle Philip has
-		assert(layers == 9);
-		assert(slices == 16);
-		data = {
-			{16, -1, 19, -1,  8, -1, 17, -1,  6, -1,  6, -1,  8, -1,  8, -1},
-		{10, 17, 10,  5,  6, 18,  8, 17,  4, 20,  4, 14,  4,  5,  1, 14},
-		{ 3, -1,  8, -1, 10, -1, 14, -1, 11, -1,  8, -1, 12, -1, 11, -1},
-			{20,  8, 19, 10, 15, 20, 12, 20, 13, 13,  0, 22, 19, 10,  0,  5},
-			{ 0, -1, 11, -1,  8, -1,  8, -1,  8, -1, 10, -1, 11, -1, 10, -1},
-			{12,  1, 10, 12, 22,  0,  5,  8,  5,  1, 24,  8, 10, 20,  7, 20},
-			{ 9, -1,  8, -1,  8, -1,  9, -1,  6, -1, 10, -1,  8, -1, 10, -1},
-			{13, 11, 13, 10, 18, 10, 10, 10, 10, 15,  7, 19, 18,  2,  9, 27},
-			{ 0, 16,  8,  4, 15,  7, 10,  1, 10,  4,  5,  3, 15, 16,  4,  7},
+		assert(layerCount == 5);
+		assert(sliceCount == 16);
+
+		layers = {
+			{{-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2},
+			{ 16, -1, 19, -1,  8, -1, 17, -1,  6, -1,  6, -1,  8, -1,  8, -1},},
+
+			{{10, 17, 10,  5,  6, 18,  8, 17,  4, 20,  4, 14,  4,  5,  1, 14},
+			{  3, -1,  8, -1, 10, -1, 14, -1, 11, -1,  8, -1, 12, -1, 11, -1},},
+
+			{{20,  8, 19, 10, 15, 20, 12, 20, 13, 13,  0, 22, 19, 10,  0,  5},
+			{  0, -1, 11, -1,  8, -1,  8, -1,  8, -1, 10, -1, 11, -1, 10, -1},},
+
+			{{12,  1, 10, 12, 22,  0,  5,  8,  5,  1, 24,  8, 10, 20,  7, 20},
+			{  9, -1,  8, -1,  8, -1,  9, -1,  6, -1, 10, -1,  8, -1, 10, -1},},
+
+			{{13, 11, 13, 10, 18, 10, 10, 10, 10, 15,  7, 19, 18,  2,  9, 27},
+			{  0, 16,  8,  4, 15,  7, 10,  1, 10,  4,  5,  3, 15, 16,  4,  7},},
 		};
 	}
 
-	/***** [Info]
-		For abstraction we will treat each physical layer of the puzzle as connected (Vice the top layer)
-	*****/
-	int physicalLayerCount() {
-		return (layers - 1) / 2 + 1;
-	}
+	void rotateLayer(int layerIndex) {
+		for(int layerIndex = 0;layerIndex < layers.size();layerIndex++) {
+			if(layerIndex % 2 == 0) {
+				layerIndexes[layerIndex + 0]++;
+				layerIndexes[layerIndex + 1]++;
+				if(layerIndexes[layerIndex] > sliceCount - 1) {
+					// [TODO] Run this the exact number of connected layers. It might NOT be 2 in the future
+					layerIndexes[layerIndex + 0] = 0;
+					layerIndexes[layerIndex + 1] = 0;
 
-	vector<int> associatedLayers(int physicalLayerIndex) {
-		vector<int> associatedLayerIndexes;
-		if(physicalLayerIndex == 0)
-			associatedLayerIndexes.push_back(0);
-		else {
-			associatedLayerIndexes.push_back((physicalLayerIndex * 2) - 1);
-			associatedLayerIndexes.push_back((physicalLayerIndex * 2) - 1 + 1);
-		}
-		return associatedLayerIndexes;
-	}
-
-	void rotatePhysicalLayer(int physicalLayerIndex) {
-		vector<int> associatedLayerIndexes = associatedLayers(physicalLayerIndex);
-
-		bool shouldRollOver = false;
-		for(int layerIndex : associatedLayerIndexes) {
-			layerIndexes[layerIndex]++;
-			if(layerIndexes[layerIndex] > slices - 1)
-				shouldRollOver = true;
-		}
-
-		if(shouldRollOver) {
-			for(int layerIndex : associatedLayerIndexes)
-				layerIndexes[layerIndex] = 0;
-			rotatePhysicalLayer(physicalLayerIndex + 1);
+					layerIndexes[layerIndex + 2]++;
+					layerIndexes[layerIndex + 3]++;
+				}
+			}
 		}
 	}
 
+	// [TODO] Actually show math
 	int calculateSlice(int sliceIndex, bool showMath = false) {
 		int sum = 0;
 
-		for(int physicalLayerIndex = 0;physicalLayerIndex <= physicalLayerCount() - 1;physicalLayerIndex++) {
-			vector<int> associatedLayerIndexes = associatedLayers(physicalLayerIndex);
-			assert(associatedLayerIndexes.size() <= 2);
+		for(int layerIndex = 0;layerIndex < layers.size();layerIndex++) {
+			// [TODO] Do asserts here
+			int value = 666;
+			vector<vector<int>> layer = layers[layerIndex];
 
-			int associatedLayerValue = data[associatedLayerIndexes.back()][sliceIndex + layerIndexes[associatedLayerIndexes.back()]];
-
-			if(associatedLayerValue == -1) {
-				vector<int> associatedNextLayerIndexes = associatedLayers(physicalLayerIndex + 1);
-				associatedLayerValue = data[associatedNextLayerIndexes.front()][sliceIndex + layerIndexes[associatedNextLayerIndexes.front()]];
+			if(false) {}
+			// If the layer[0][sliceIndex] is >= 0 then we assume it's value
+			else if(layer[0][sliceIndex] >= 0) {
+				value = layer[0][sliceIndex];
+			}
+			// If the layer[0][sliceIndex] is -2 then we assume it's [1] value
+			// Exception, if layer[n - 1][sliceIndex] was not -1 then we assume n[1]'s value
+			else if(layer[0][sliceIndex] == -2) {
+				value = layer[1][sliceIndex];
+				// Stopped here, no effing sure what the heck I am doing...
+			}
+			// If the layer[1][sliceIndex] is -1 then we fall through
+			else if(layer[1][sliceIndex] == -1) {
+				vector<vector<int>> nextLayer = layers[layerIndex + 1];
+				value = nextLayer[1][sliceIndex];
 			}
 
-			if(showMath) {
-				static bool introduce = false;
-				if(!introduce) {
-					cout << "Calculating Slice " << sliceIndex << " of:" << endl;
-					renderLayerIndexes();
-					introduce = true;
-				}
-
-				cout << associatedLayerValue << endl;
-			}
-
-			sum += associatedLayerValue;
+			cout << value << endl;
+			sum += value;
 		}
 
 		return sum;
@@ -106,8 +96,8 @@ public:
 		cout << "}" << endl;
 	}
 
-	int layers, slices;
-	vector<vector<int>> data;
+	int layerCount, sliceCount;
+	vector<vector<vector<int>>> layers;
 	vector<int> layerIndexes;
 };
 
@@ -136,8 +126,11 @@ int main() {
 	}
 	cout << "Largest concurrent was " << largestConcurrent << endl;*/
 
-	for(int d = 0;d < 16;d++) {
+	/*for(int d = 0;d < 16;d++) {
 		puzzle->rotatePhysicalLayer(0);
 	}
-	cout << puzzle->calculateSlice(0, true) << endl;
+	cout << puzzle->calculateSlice(0, true) << endl;*/
+
+	puzzle->renderLayerIndexes();
+	cout << puzzle->calculateSlice(0) << endl;
 }
