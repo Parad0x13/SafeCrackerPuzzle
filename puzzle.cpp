@@ -14,14 +14,14 @@ public:
 	Puzzle(int _layerCount = 5, int _sliceCount = 16) {
 		layerCount = _layerCount;
 		sliceCount = _sliceCount;
-		layerIndexes = vector<int>(layerCount);
+		layerIndexes = vector<int>(layerCount);		// [TODO] Rename this to rotations or something
 
 		// [TODO] Add initialization support for situations other than the puzzle Philip has
 		assert(layerCount == 5);
 		assert(sliceCount == 16);
 
 		layers = {
-			{{-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2},
+			{{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 			{ 16, -1, 19, -1,  8, -1, 17, -1,  6, -1,  6, -1,  8, -1,  8, -1},},
 
 			{{10, 17, 10,  5,  6, 18,  8, 17,  4, 20,  4, 14,  4,  5,  1, 14},
@@ -39,18 +39,11 @@ public:
 	}
 
 	void rotateLayer(int layerIndex) {
+		layerIndexes[layerIndex]++;
 		for(int layerIndex = 0;layerIndex < layers.size();layerIndex++) {
-			if(layerIndex % 2 == 0) {
-				layerIndexes[layerIndex + 0]++;
-				layerIndexes[layerIndex + 1]++;
-				if(layerIndexes[layerIndex] > sliceCount - 1) {
-					// [TODO] Run this the exact number of connected layers. It might NOT be 2 in the future
-					layerIndexes[layerIndex + 0] = 0;
-					layerIndexes[layerIndex + 1] = 0;
-
-					layerIndexes[layerIndex + 2]++;
-					layerIndexes[layerIndex + 3]++;
-				}
+			if(layerIndexes[layerIndex] > sliceCount - 1) {
+				layerIndexes[layerIndex + 0]  = 0;
+				layerIndexes[layerIndex + 1] += 1;
 			}
 		}
 	}
@@ -64,24 +57,23 @@ public:
 			int value = 666;
 			vector<vector<int>> layer = layers[layerIndex];
 
-			if(false) {}
-			// If the layer[0][sliceIndex] is >= 0 then we assume it's value
-			else if(layer[0][sliceIndex] >= 0) {
-				value = layer[0][sliceIndex];
-			}
-			// If the layer[0][sliceIndex] is -2 then we assume it's [1] value
-			// Exception, if layer[n - 1][sliceIndex] was not -1 then we assume n[1]'s value
-			else if(layer[0][sliceIndex] == -2) {
-				value = layer[1][sliceIndex];
-				// Stopped here, no effing sure what the heck I am doing...
-			}
-			// If the layer[1][sliceIndex] is -1 then we fall through
-			else if(layer[1][sliceIndex] == -1) {
-				vector<vector<int>> nextLayer = layers[layerIndex + 1];
-				value = nextLayer[1][sliceIndex];
+			int activeLayerRotation = layerIndexes[layerIndex];
+			int properLayerSliceIndex = sliceIndex + activeLayerRotation;
+
+			int inner = max(0, layer[0][properLayerSliceIndex]);
+			int outer = max(0, layer[1][properLayerSliceIndex]);
+			value = inner + outer;
+
+			if(layerIndex > 0) {
+				vector<vector<int>> previousLayer = layers[layerIndex - 1];
+				int activePreviousLayerRotation = layerIndexes[layerIndex - 1];
+				int properPreviousLayerSliceIndex = sliceIndex + activePreviousLayerRotation;
+				if(previousLayer[1][properPreviousLayerSliceIndex] != -1) {
+					value = outer;
+				}
 			}
 
-			cout << value << endl;
+			//cout << value << endl;
 			sum += value;
 		}
 
@@ -104,7 +96,7 @@ public:
 int main() {
 	Puzzle *puzzle = new Puzzle();
 
-	/*int largestConcurrent = 0;
+	int largestConcurrent = 0;
 	for(int d = 0;d < 16 * 16 * 16 * 16 * 16 - 1;d++) {
 		bool solution = true;
 		int concurrent = 0;
@@ -122,15 +114,7 @@ int main() {
 		}
 		if(solution)
 			puzzle->renderLayerIndexes();
-		puzzle->rotatePhysicalLayer(0);
+		puzzle->rotateLayer(0);
 	}
-	cout << "Largest concurrent was " << largestConcurrent << endl;*/
-
-	/*for(int d = 0;d < 16;d++) {
-		puzzle->rotatePhysicalLayer(0);
-	}
-	cout << puzzle->calculateSlice(0, true) << endl;*/
-
-	puzzle->renderLayerIndexes();
-	cout << puzzle->calculateSlice(0) << endl;
+	cout << "Largest concurrent was " << largestConcurrent << endl;
 }
