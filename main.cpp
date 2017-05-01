@@ -9,7 +9,7 @@
 	someone who's studied math more than I have but at least to me the pattern is kinda cool.
 
 	[STRUCTURE]
-	The physical puzzle can be seen here: http://i.imgur.com/cXxvNXn.jpg
+	The physical puzzle in it's solved state can be seen here: http://i.imgur.com/PJBKLXQ.jpg
 	Or in the folder with this sourcecode
 
 	I decided to group each layer in a nested vector consisting of another vector with their values.
